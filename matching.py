@@ -11,6 +11,8 @@ read file's first
 checkin_file = pd.read_csv('CheckIn.csv',dtype=object)
 master_file = pd.read_csv('Mastersheet.csv')
 
+
+
 # first of all merge status and Membership type columns of csv file
 
 # merge column status and membership types as tmp
@@ -31,6 +33,24 @@ checkin_file['Membership Type']=checkin_file['Membership Type'].replace({'nan':'
 checkin_file =checkin_file.sort_values(by= 'Email')
 
 master_file = master_file.sort_values(by = 'Email')
+master_file = master_file.rename(columns = {'Next Payment Date ':'Next Payment Date'},inplace=False)
+
+
+checkin_file= checkin_file[master_file.columns]
+
+checkin_file['Next Payment Date']=pd.to_datetime(checkin_file['Next Payment Date'],errors='coerce')
+master_file['Next Payment Date']=pd.to_datetime(master_file['Next Payment Date'],errors='coerce')
+
+
+
+
+
+
+
+'''
+data clearning starts here
+'''
+
 
 # task 1 find entries with na emails in master file
 master_na_email = master_file[master_file['Email'].isna()]
@@ -84,7 +104,8 @@ for i,x in enumerate(master_email):
     x_count=0
     for j, y in enumerate(checkin_email):
         if x ==y: # if x is equal to y
-            result=master_is_email.loc(0)[i].str.lower() == checkin_file.loc(0)[j].str.lower()
+            result=list(master_is_email.loc(0)[i].str.lower()[:-1] == checkin_file.loc(0)[j].str.lower()[:-1])
+            result.append(master_is_email.loc(0)[i][-1]==checkin_file.loc(0)[j][-1])
             matched_details.append({x:list(result)})
             x_count+=1
             
